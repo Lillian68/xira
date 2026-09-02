@@ -1,0 +1,101 @@
+[
+  {
+    "name": "半夏",
+    "name_en": "Pinellia Rhizome",
+    "img_prefix": "banxia",
+    "rarity": 1,
+    "weight": 30,
+    "germinate_time": 1,
+    "grow_time": 3,
+    "desc": "天南星科有毒块茎药材，经炮制后可燥湿化痰、降逆止呕、消痞散结，为生用有毒的常用化痰止呕药",
+    "desc_en": "A toxic tuberous herb of the Araceae family. After processing, it can dry dampness and resolve phlegm, descend rebellious qi and stop vomiting, and relieve distension and dissipate nodules. It is a commonly used phlegm-resolving and antiemetic herb, but toxic when used raw."
+  },
+  {
+    "name": "龙葵",
+    "name_en": "Black Nightshade Herb",
+    "img_prefix": "longkui",
+    "rarity": 1,
+    "weight": 30,
+    "germinate_time": 1,
+    "grow_time": 3,
+    "desc": "茄科有小毒草本，全草入药，能清热解毒、活血消肿，多用于疮痈肿毒与跌打损伤",
+    "desc_en": "A slightly toxic herb of the nightshade family (Solanaceae). The whole plant is used medicinally. It can clear heat, remove toxins, invigorate blood, and reduce swelling. It is often used for sores, abscesses, swellings, and traumatic injuries."
+  },
+  {
+    "name": "雪见",
+    "name_en": "Xuejian",
+    "img_prefix": "xuejian",
+    "rarity": 1,
+    "weight": 30,
+    "germinate_time": 1,
+    "grow_time": 3,
+    "desc": "唇形科草本，性凉味苦辛，可清热解毒、凉血利尿，常用于咽喉肿痛、水肿疮肿等症",
+    "desc_en": "A herb of the mint family (Lamiaceae). Cool in nature and bitter-pungent in taste, it clears heat, removes toxins, cools blood, and promotes diuresis. It is often used for sore throat, edema, sores, and swellings."
+  },
+  {
+    "name": "紫萱",
+    "name_en": "Daylily",
+    "img_prefix": "zixuan",
+    "rarity": 1,
+    "weight": 30,
+    "germinate_time": 1,
+    "grow_time": 3,
+    "desc": "百合科萱草，性味甘凉，可清热利湿、凉血安神，鲜品含秋水仙碱，需处理去毒方可使用",
+    "desc_en": "A daylily of the lily family (Liliaceae). Sweet and cool in nature, it can clear heat, drain dampness, cool blood, and calm the mind. The fresh plant contains colchicine and must be processed to remove toxicity before use."
+  },
+  {
+    "name": "徐长卿",
+    "name_en": "Cynanchum Paniculatum",
+    "img_prefix": "xuchangqing",
+    "rarity": 1,
+    "weight": 30,
+    "germinate_time": 1,
+    "grow_time": 3,
+    "desc": "性温味辛，擅长祛风止痛，对于风湿痹痛、胃痛牙痛及皮肤瘙痒均有良效",
+    "desc_en": "Warm in nature and pungent in taste, it excels at dispelling wind and relieving pain. It is effective for rheumatic pain, stomachache, toothache, and itchy skin."
+  },
+  {
+    "name": "景天",
+    "name_en": "Sedum",
+    "img_prefix": "jingtian",
+    "rarity": 1,
+    "weight": 30,
+    "germinate_time": 1,
+    "grow_time": 3,
+    "desc": "性寒，能清热解毒、活血止血，常用于治疗丹毒、疮疖及外伤出血",
+    "desc_en": "Cold in nature, it can clear heat, remove toxins, invigorate blood, and stop bleeding. It is often used to treat erysipelas, boils, and bleeding from traumatic injuries."
+  },
+  {
+    "name": "重楼",
+    "name_en": "Paris Root",
+    "img_prefix": "chonglou",
+    "rarity": 1,
+    "weight": 30,
+    "germinate_time": 1,
+    "grow_time": 3,
+    "desc": "性微寒，是清热解毒、消肿止痛的要药，尤其擅长解蛇毒和治疗疮痈肿毒",
+    "desc_en": "Slightly cold in nature, it is a key herb for clearing heat, removing toxins, reducing swelling, and relieving pain. It is especially effective for snakebites and treating sores, abscesses, and toxic swellings."
+  },
+  {
+    "name": "飞蓬",
+    "name_en": "Fleabane",
+    "img_prefix": "feipeng",
+    "rarity": 1,
+    "weight": 30,
+    "germinate_time": 1,
+    "grow_time": 3,
+    "desc": "性凉，主要功效为清热利湿、散瘀消肿，多用于肠炎、肝炎及跌打损伤",
+    "desc_en": "Cool in nature, its main effects are clearing heat, draining dampness, dispelling blood stasis, and reducing swelling. It is often used for enteritis, hepatitis, and traumatic injuries."
+  },
+  {
+    "name": "苏叶",
+    "name_en": "Perilla Leaf",
+    "img_prefix": "suye",
+    "rarity": 1,
+    "weight": 30,
+    "germinate_time": 1,
+    "grow_time": 3,
+    "desc": "唇形科紫苏的叶片，性温味辛，能解表散寒、行气和胃，常用于风寒感冒、咳嗽呕恶及鱼蟹中毒",
+    "desc_en": "The leaf of Perilla frutescens, a plant of the mint family (Lamiaceae). Warm in nature and pungent in taste, it can release the exterior and disperse cold, promote the flow of qi and harmonize the stomach. It is often used for wind-cold common cold, cough, nausea, vomiting, and fish or crab poisoning."
+  }
+]

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+DOCKER_DIR="$PROJECT_ROOT/docker"
+
+cd "$DOCKER_DIR"
+docker compose -f docker-compose.middleware.yaml -p xira up -d
+
+for _ in $(seq 1 30); do
+  if docker exec xira-ollama ollama list >/dev/null 2>&1; then
+    break
+  fi
+  sleep 2
+done
+
+if docker exec xira-ollama ollama list 2>/dev/null | grep -q "qwen2.5:7b"; then
+  :
+else
+  docker exec xira-ollama ollama pull qwen2.5:7b
+fi

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+BACKEND_DIR="$PROJECT_ROOT/backend"
+FRONTEND_DIR="$PROJECT_ROOT/frontend"
+
+if [ ! -d "$BACKEND_DIR/.venv" ]; then
+  python3 -m venv "$BACKEND_DIR/.venv"
+fi
+
+if [ ! -d "$FRONTEND_DIR/node_modules" ]; then
+  cd "$FRONTEND_DIR"
+  npm install
+fi
+
+cd "$BACKEND_DIR"
+source .venv/bin/activate
+pip install -r requirements.txt
+
+if [ ! -f .env ]; then
+  cp .env.example .env
+fi
+
+cd "$FRONTEND_DIR"
+if [ ! -f .env.local ]; then
+  cp .env.local.example .env.local
+fi

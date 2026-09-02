@@ -1,0 +1,20 @@
+line-length = 120
+
+[format]
+quote-style = "double"
+
+[lint]
+select = [
+    "E",       # pycodestyle E rules
+    "F",       # pyflakes rules
+    "W",       # pycodestyle W rules (whitespace, line breaks)
+    "I",       # isort rules
+    "UP",      # pyupgrade rules
+    "B",       # flake8-bugbear rules (common pitfalls)
+    "SIM",     # flake8-simplify rules
+    "S102",    # exec-builtin, disallow use of `exec`
+    "S307",    # suspicious-eval-usage, disallow use of `eval` and `ast.literal_eval`
+    "S301",    # suspicious-pickle-usage, disallow use of `pickle` and its wrappers.
+    "S302",    # suspicious-marshal-usage, disallow use of `marshal` module
+    "T201",    # print-found
+]

@@ -1,0 +1,248 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --mist: #f8faf9;
+  --soil: #4b3621;
+  --soil-surface: #5a4228;
+  --soil-subtle: #3e2e1f;
+  --pot: #8b5e3c;
+  --primary: #3e5c5a;
+  --secondary: #e2ede9;
+  --growth: #709a85;
+  --wither: #d1c2a5;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  color: var(--primary);
+  background: var(--mist);
+  font-family: var(--font-sans), "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
+    sans-serif;
+}
+
+/* Soil & pot textures */
+.dashboard-garden {
+  min-height: 100vh;
+  background: radial-gradient(circle at top left, #e7ddd0 0%, transparent 22%),
+    radial-gradient(circle at top right, rgba(35, 92, 62, 0.08) 0%, transparent 14%),
+    linear-gradient(180deg, #f5efe4 0%, #e9dfd1 45%, #e1d2bb 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-garden::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 18% 18%, rgba(255,255,255,0.8) 0%, transparent 24%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.68) 0%, transparent 22%),
+    radial-gradient(circle at 50% 40%, rgba(147, 110, 73, 0.08) 0%, transparent 15%),
+    radial-gradient(circle at 40% 65%, rgba(93, 52, 27, 0.08) 0%, transparent 12%);
+  pointer-events: none;
+}
+
+.dashboard-patch {
+  position: relative;
+  background-image:
+    linear-gradient(180deg, rgba(87, 56, 29, 0.35), rgba(36, 22, 12, 0.55)),
+    url('/soil.png');
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 20px 45px -20px rgba(0,0,0,0.5), 0 18px 60px -38px rgba(0,0,0,0.35);
+  border-radius: 40px;
+  border: 1px solid rgba(255,255,255,0.22);
+  overflow: hidden;
+}
+
+.garden {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(140px, 1fr));
+  gap: 16px;
+  padding: 1.25rem 1rem 1rem;
+  align-items: center;
+}
+
+.garden-tile {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  min-height: 120px;
+  border-radius: 26px;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: transform 220ms ease, box-shadow 220ms ease;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 0.5rem;
+  background: rgba(255,255,255,0.04);
+}
+
+.garden-tile:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.16);
+}
+
+.tile-grass {
+  background: linear-gradient(180deg, #bed99b 0%, #86b36a 100%);
+}
+
+.tile-soil {
+  background: linear-gradient(180deg, #6e4a31 0%, #412713 100%);
+  box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.45);
+  cursor: url("/shovel.png") 16 16, pointer;
+}
+
+.tile-seedling {
+  background: linear-gradient(180deg, #4c331f 0%, #23140a 100%);
+  box-shadow: inset 0 0 28px rgba(80, 160, 90, 0.38);
+  cursor: url("/shovel.png") 16 16, pointer;
+}
+
+.tile-label {
+  position: absolute;
+  inset: auto 0 10px 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(238, 242, 235, 0.88);
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.24);
+}
+
+.tile-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.plot-spirit,
+.plot-shovel {
+  position: relative;
+  width: 52%;
+  max-width: 76px;
+  pointer-events: none;
+}
+
+.plot-shovel {
+  width: 46%;
+  max-width: 72px;
+  opacity: 0.98;
+  transform: translateY(6%) rotate(-10deg);
+}
+
+.garden-plot {
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.24);
+  background: linear-gradient(180deg, rgba(255, 245, 220, 0.16), rgba(0, 0, 0, 0.16));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 12px 24px rgba(30, 20, 10, 0.2);
+  overflow: hidden;
+  backdrop-filter: blur(2px);
+}
+
+.garden-plot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent 45%, rgba(0,0,0,0.12));
+  pointer-events: none;
+}
+
+.bg-soilbed {
+  background-color: var(--soil);
+  background-image: linear-gradient(180deg, rgba(0,0,0,0.06) 0%, transparent 40%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 4px, transparent 4px 10px);
+  box-shadow: inset 0 12px 18px -12px rgba(0,0,0,0.35);
+}
+
+.pot {
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--pot), color-mix(in srgb, var(--pot) 80%, black 10%));
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  padding: 6px;
+}
+
+.soil-surface {
+  background: linear-gradient(180deg, var(--soil-surface), var(--soil-subtle));
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* subtle soil particles using pseudo element */
+.soil-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    radial-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+  background-size: 14px 14px, 28px 28px;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+/* hover animation: slight soil shift and droplet shimmer */
+.soil-shake {
+  transition: transform 220ms cubic-bezier(.22,.9,.32,1), box-shadow 220ms;
+}
+.soil-shake:hover {
+  transform: translateY(-4px) rotate(-0.3deg);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+}
+.soil-droplets {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.soil-droplets span {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(255,255,255,0.55);
+  border-radius: 999px;
+  opacity: 0;
+  transform: translateY(0) scale(0.7);
+  transition: opacity 260ms, transform 360ms;
+}
+.soil-shake:hover .soil-droplets span {
+  opacity: 1;
+  transform: translateY(-18px) scale(1);
+}
+
+.plot-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 20, 0.35);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.plot-modal {
+  width: min(720px, 100%);
+  background: rgba(247,240,230,0.98);
+  border: 1px solid rgba(114, 85, 51, 0.12);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.12);
+  border-radius: 32px;
+  padding: 28px;
+}
+
+.shadow-soft {
+  box-shadow: 0 14px 30px rgba(67, 50, 31, 0.1);
+}
+
+.shadow-brown\/10 {
+  box-shadow: 0 20px 30px rgba(92, 60, 25, 0.12);
+}
+

@@ -1,0 +1,13 @@
+use_default_settings: true
+
+server:
+  secret_key: "xira-searxng-change-me"
+  bind_address: "0.0.0.0"
+
+search:
+  formats:
+    - html
+    - json
+
+limiter:
+  enabled: true
