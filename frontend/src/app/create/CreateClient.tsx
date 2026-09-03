@@ -143,6 +143,10 @@ export default function CreateClient() {
         setFormError(t.checkIntervalRequired);
         return;
       }
+      if (checkIntervalDays >= totalDays) {
+        setFormError(t.checkIntervalTooLarge);
+        return;
+      }
     }
 
     setStep((s) => s + 1);
@@ -184,6 +188,10 @@ export default function CreateClient() {
     }
     if (!checkIntervalDays || checkIntervalDays < 1) {
       setFormError(t.checkIntervalRequired);
+      return;
+    }
+    if (checkIntervalDays >= totalDays) {
+      setFormError(t.checkIntervalTooLarge);
       return;
     }
     if (!token) {

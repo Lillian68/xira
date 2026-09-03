@@ -134,6 +134,17 @@ export default function DashboardPage() {
                 onMouseEnter={() => setIsSoilHovered(false)}
                 onMouseLeave={() => setIsSoilHovered(true)}
               />
+              <div
+                className="absolute inset-x-0 top-1 flex justify-center pointer-events-none"
+                style={{ zIndex: 5 }}
+              >
+                <span
+                  className="text-xs md:text-sm font-medium text-white bg-black/50 px-2 py-1 rounded-full whitespace-nowrap overflow-hidden text-ellipsis max-w-full"
+                  style={{ maxWidth: "90%" }}
+                >
+                  {locale === "en" ? plan.spirit?.name_en : plan.spirit?.name}
+                </span>
+              </div>
             </div>
           );
         })}

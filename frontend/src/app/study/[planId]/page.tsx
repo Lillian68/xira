@@ -64,7 +64,7 @@ export default function StudyPage() {
   const [activeItem, setActiveItem] = useState<ActiveItem | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [checking, setChecking] = useState(false);
-  const [checkpointPassedMap, setCheckpointPassedMap] = useState<Record<number, boolean>>({});
+  const [checkpointPassedMap, setCheckpointPassedMap] = useState<Record<number, boolean | null>>({});
   const [spiritMessage, setSpiritMessage] = useState<string | undefined>(undefined);
 
   const checkCacheRef = useRef<Record<number, CheckItem | null>>({});
@@ -78,63 +78,70 @@ export default function StudyPage() {
     if (initRef.current) return;
     initRef.current = true;
 
-    fetchPlan(planId).then(async (p) => {
-      const tasks = p.tasks || [];
-      const interval = p.check_interval || 0;
-      const checkpointDays = getCheckpointDays(tasks.length, interval);
+    const loadInitialState = async () => {
+      try {
+        const p = await fetchPlan(planId);
+        const tasks = p.tasks || [];
+        const interval = p.check_interval || 0;
+        const checkpointDays = getCheckpointDays(tasks.length, interval);
 
-      const passedMap: Record<number, boolean> = {};
-      let pendingCheckpoint: number | null = null;
+        const passedMap: Record<number, boolean | null> = {};
+        let pendingCheckpoint: number | null = null;
 
-      for (const afterDay of checkpointDays) {
-        const targetDay = tasks.find((d) => d.day_number === afterDay);
-        if (!targetDay?.is_completed) continue;
+        for (const afterDay of checkpointDays) {
+          const targetDay = tasks.find((d) => d.day_number === afterDay);
+          if (!targetDay?.is_completed) continue;
 
-        let check: CheckItem | null = null;
-        try {
-          check = await api<CheckItem | null>(
-            `/api/check/${planId}/${afterDay}`,
-            { method: "GET" },
-            token
-          );
-        } catch {
-          check = null;
-        }
+          let check: CheckItem | null = null;
+          try {
+            check = await api<CheckItem | null>(
+              `/api/check/${planId}/${afterDay}`,
+              { method: "GET" },
+              token
+            );
+          } catch {
+            check = null;
+          }
 
-        checkCacheRef.current[afterDay] = check;
+          checkCacheRef.current[afterDay] = check;
 
-        if (check) {
-          if (check.passed === true) {
-            passedMap[afterDay] = true;
+          if (check) {
+            if (check.passed !== null && check.passed !== undefined) {
+              passedMap[afterDay] = check.passed;
+            } else {
+              if (pendingCheckpoint === null) {
+                pendingCheckpoint = afterDay;
+              }
+              break;
+            }
           } else {
             if (pendingCheckpoint === null) {
               pendingCheckpoint = afterDay;
             }
             break;
           }
+        }
+
+        setCheckpointPassedMap(passedMap);
+
+        if (pendingCheckpoint !== null) {
+          setActiveItem({ type: "checkpoint", afterDay: pendingCheckpoint });
         } else {
-          if (pendingCheckpoint === null) {
-            pendingCheckpoint = afterDay;
+          const nextTask = tasks.find((d) => !d.is_completed);
+          if (nextTask) {
+            setActiveItem({ type: "day", task: nextTask });
+          } else if (tasks.length > 0) {
+            setActiveItem({ type: "remedial" });
+          } else {
+            setActiveItem(null);
           }
-          break;
         }
+      } catch (error) {
+        console.error("Failed to load initial study state:", error);
       }
+    };
 
-      setCheckpointPassedMap(passedMap);
-
-      if (pendingCheckpoint !== null) {
-        setActiveItem({ type: "checkpoint", afterDay: pendingCheckpoint });
-      } else {
-        const nextTask = tasks.find((d) => !d.is_completed);
-        if (nextTask) {
-          setActiveItem({ type: "day", task: nextTask });
-        } else if (tasks.length > 0) {
-          setActiveItem({ type: "remedial" });
-        } else {
-          setActiveItem(null);
-        }
-      }
-    });
+    loadInitialState();
   }, [token, planId, router, fetchPlan]);
 
   const tasks = current?.tasks || [];
@@ -152,6 +159,15 @@ export default function StudyPage() {
     if (!tasks.length) return false;
     return tasks.every((p) => p.is_completed);
   }, [tasks]);
+
+  const isCheckpointSubmitted = (afterDay: number) => {
+    return checkpointPassedMap[afterDay] !== undefined;
+  };
+
+  const allCheckpointsSubmitted = useMemo(() => {
+    if (checkpointDays.length === 0) return true;
+    return checkpointDays.every(day => isCheckpointSubmitted(day));
+  }, [checkpointDays, checkpointPassedMap]);
 
   const isCheckpointPassed = (afterDay: number) => {
     return checkpointPassedMap[afterDay] === true;
@@ -185,11 +201,11 @@ export default function StudyPage() {
       return true;
     }
 
-    const firstFailedCheckpoint = checkpointDays.find(
-      (afterDay) => !isCheckpointPassed(afterDay)
+    const firstUnsubmittedCheckpoint = checkpointDays.find(
+      (afterDay) => !isCheckpointSubmitted(afterDay)
     );
 
-    if (firstFailedCheckpoint !== undefined && dayNumber > firstFailedCheckpoint) {
+    if (firstUnsubmittedCheckpoint !== undefined && dayNumber > firstUnsubmittedCheckpoint) {
       return true;
     }
 
@@ -260,48 +276,42 @@ export default function StudyPage() {
     setCheckpointPassedMap((prev) => ({ ...prev, [afterDay]: passed }));
   }, []);
 
-  const handlePlanAdjusted = useCallback(async (adjustedAfterDay: number) => {
-    const plan = await fetchPlan(planId);
-    const tasks = plan.tasks || [];
-    const interval = plan.check_interval || 0;
-    const newCheckpointDays = getCheckpointDays(tasks.length, interval);
+  const refreshAfterAdjust = useCallback(async () => {
+    try {
+      const plan = await fetchPlan(planId);
+      const tasks = plan.tasks || [];
+      const interval = plan.check_interval || 0;
+      const newCheckpointDays = getCheckpointDays(tasks.length, interval);
 
-    setCheckpointPassedMap((prev) => {
-      const newMap: Record<number, boolean> = {};
-      for (const day of newCheckpointDays) {
-        if (prev[day] || day === adjustedAfterDay) {
-          newMap[day] = true;
+      const newPassedMap: Record<number, boolean | null> = {};
+      for (const afterDay of newCheckpointDays) {
+        const targetDay = tasks.find((d) => d.day_number === afterDay);
+        if (!targetDay?.is_completed) continue;
+
+        try {
+          const check = await api<CheckItem | null>(
+            `/api/check/${planId}/${afterDay}`,
+            { method: "GET" },
+            token
+          );
+          checkCacheRef.current[afterDay] = check;
+          if (check && check.passed !== null && check.passed !== undefined) {
+            newPassedMap[afterDay] = check.passed;
+          }
+        } catch {
         }
       }
-      return newMap;
-    });
 
-    checkCacheRef.current = {};
-
-    const nextTask = tasks.find((d) => !d.is_completed);
-    if (nextTask) {
-      setActiveItem({ type: "day", task: nextTask });
-    } else if (tasks.length > 0) {
-      setActiveItem({ type: "remedial" });
-    } else {
-      setActiveItem(null);
+      setCheckpointPassedMap(newPassedMap);
+    } catch (error) {
+      console.error("Failed to refresh plan after adjust:", error);
     }
-  }, [fetchPlan, planId]);
+  }, [fetchPlan, planId, token]);
 
   const handlePlanAdjustedFromRemedial = useCallback(async () => {
     const plan = await fetchPlan(planId);
     const tasks = plan.tasks || [];
-    const interval = plan.check_interval || 0;
-    const newCheckpointDays = getCheckpointDays(tasks.length, interval);
-
-    setCheckpointPassedMap((prev) => {
-      const newMap: Record<number, boolean> = {};
-      for (const day of newCheckpointDays) {
-        if (prev[day]) newMap[day] = true;
-      }
-      return newMap;
-    });
-
+    setCheckpointPassedMap({});
     checkCacheRef.current = {};
 
     const nextTask = tasks.find((d) => !d.is_completed);
@@ -374,6 +384,7 @@ export default function StudyPage() {
               } else if (item.type === "checkpoint") {
                 const unlocked = isCheckpointUnlocked(item.afterDay);
                 const isActive = activeItem?.type === "checkpoint" && activeItem.afterDay === item.afterDay;
+                const submitted = isCheckpointSubmitted(item.afterDay);
                 const passed = isCheckpointPassed(item.afterDay);
                 return (
                   <button
@@ -387,8 +398,10 @@ export default function StudyPage() {
                     }}
                     className={`shrink-0 inline-flex items-center gap-1 rounded-sm border border-primary/20 px-3 py-1.5 text-xs transition ${isActive
                       ? "bg-soil text-secondary"
-                      : passed
-                        ? "bg-growth/25 text-primary"
+                      : submitted
+                        ? passed
+                          ? "bg-growth/25 text-primary"
+                          : "bg-yellow-100 text-yellow-800"
                         : unlocked
                           ? "bg-secondary text-primary hover:bg-secondary/80"
                           : "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -396,12 +409,12 @@ export default function StudyPage() {
                   >
                     <ClipboardCheck className="h-3.5 w-3.5" />
                     {t.stageCheck}
-                    {passed && " ✓"}
+                    {submitted && (passed ? " ✓" : " ⚠️")}
                     {!unlocked && ` 🔒`}
                   </button>
                 );
               } else if (item.type === "remedial") {
-                const unlocked = isAllCompleted;
+                const unlocked = isAllCompleted && allCheckpointsSubmitted;
                 const isActive = activeItem?.type === "remedial";
                 return (
                   <button
@@ -489,7 +502,7 @@ export default function StudyPage() {
               afterDay={activeItem.afterDay}
               initialCheck={checkCacheRef.current[activeItem.afterDay]}
               onPassedChange={handleCheckpointPassedChange}
-              onPlanAdjusted={handlePlanAdjusted}
+              onPlanAdjusted={refreshAfterAdjust}
             />
           )}
 
@@ -555,7 +568,7 @@ function CheckpointPanel({
   afterDay: number;
   initialCheck?: CheckItem | null;
   onPassedChange?: (afterDay: number, passed: boolean) => void;
-  onPlanAdjusted?: (afterDay: number) => void | Promise<void>;
+  onPlanAdjusted?: () => void | Promise<void>;
 }) {
   const token = useAuthStore((s) => s.token);
   const locale = useLocaleStore((s) => s.locale);
@@ -564,6 +577,8 @@ function CheckpointPanel({
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [adjusting, setAdjusting] = useState(false);
+  const [adjustMessage, setAdjustMessage] = useState("");
 
   const onPassedChangeRef = useRef(onPassedChange);
   useEffect(() => {
@@ -650,6 +665,17 @@ function CheckpointPanel({
     loadCheck();
   }, [planId, afterDay, token, check, initialCheck]);
 
+  const checklistHtml = useMemo(() => {
+    if (!check?.checklist) return "";
+
+    return check.checklist
+      .replace(/^### (.*)$/gm, '<h3 class="mt-4 font-display text-lg text-soil">$1</h3>')
+      .replace(/^## (.*)$/gm, '<h2 class="mt-5 font-display text-xl text-soil">$1</h2>')
+      .replace(/^- (.*)$/gm, '<li class="ml-4 list-disc text-primary/80">$1</li>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br/>');
+  }, [check?.checklist]);
+
   const handleSubmit = async () => {
     if (!token) return;
     if (!check || !inputText.trim() || submittingRef.current) return;
@@ -674,6 +700,8 @@ function CheckpointPanel({
       }
 
       if (checkpoint.passed === false) {
+        setAdjusting(true);
+        setAdjustMessage(t.planAdjusting);
         try {
           const adjustTaskRes = await api<{ task_id: string }>(
             `/api/plans/update/${planId}`,
@@ -681,9 +709,12 @@ function CheckpointPanel({
             token
           );
           await listenTaskResult(adjustTaskRes.task_id, token);
-          await onPlanAdjustedRef.current?.(afterDay);
+          await onPlanAdjustedRef.current?.();
+          setAdjustMessage(t.planAdjusted);
         } catch (adjustErr) {
-          setError(adjustErr instanceof Error ? adjustErr.message : t.planAdjustmentFailed);
+          setAdjustMessage(adjustErr instanceof Error ? adjustErr.message : t.planAdjustmentFailed);
+        } finally {
+          setAdjusting(false);
         }
       }
     } catch (err) {
@@ -722,9 +753,10 @@ function CheckpointPanel({
 
       {!isSubmitted && check && (
         <>
-          <p className="mt-4 text-sm text-primary/80">
-            {check.checklist || t.selfFeedback}
-          </p>
+          <div
+            className="prose-xira mt-4 text-sm leading-relaxed text-primary/80"
+            dangerouslySetInnerHTML={{ __html: checklistHtml || t.selfFeedback }}
+          />
 
           <textarea
             className="mt-4 min-h-28 w-full rounded-sm border border-primary/15 bg-secondary/40 px-3 py-2 text-sm"
@@ -759,6 +791,8 @@ function CheckpointPanel({
           ) : (
             <p className="mt-3 text-sm text-primary/70">{t.noEvaluation}</p>
           )}
+          {adjusting && <p className="mt-2 text-sm text-blue-600">{adjustMessage}</p>}
+          {!adjusting && adjustMessage && <p className="mt-2 text-sm text-blue-600">{adjustMessage}</p>}
           {error && <p className="mt-2 text-sm text-red-700/80">{error}</p>}
         </div>
       )}

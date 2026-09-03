@@ -54,6 +54,7 @@ export const translations: Record<Locale, {
   startDatePast: string;
   endDateBeforeStart: string;
   checkIntervalRequired: string;
+  checkIntervalTooLarge: string;
   loginRequired: string;
   taskIdMissing: string;
   submitFailed: string;
@@ -88,6 +89,8 @@ export const translations: Record<Locale, {
   fetchStageCheckFailed: string;
   stageCheckTitle: string;
   stageCheckLoading: string;
+  planAdjusting: string;
+  planAdjusted: string;
   planAdjustmentFailed: string;
   loadingDiagnosis: string;
   diagnosisDetail: string;
@@ -150,6 +153,7 @@ export const translations: Record<Locale, {
     startDatePast: "起始日期不能选择过去的日期",
     endDateBeforeStart: "结束日期不能早于起始日期",
     checkIntervalRequired: "阶段检验频率至少为1天",
+    checkIntervalTooLarge: "阶段检验频率不能大于计划总天数。",
     loginRequired: "请先登录",
     taskIdMissing: "未获取到任务ID，无法监听生成进度",
     submitFailed: "提交失败，请重试",
@@ -184,6 +188,8 @@ export const translations: Record<Locale, {
     fetchStageCheckFailed: "获取阶段检验失败",
     stageCheckTitle: "阶段检验",
     stageCheckLoading: "正在生成自检清单…",
+    planAdjusting: "正在调整计划…",
+    planAdjusted: "计划已调整，请继续学习。",
     planAdjustmentFailed: "计划调整失败，请稍后手动更新",
     loadingDiagnosis: "正在加载已有诊断…",
     diagnosisDetail: "诊断详情",
@@ -246,6 +252,7 @@ export const translations: Record<Locale, {
     startDatePast: "Start date cannot be in the past",
     endDateBeforeStart: "End date cannot be earlier than start date",
     checkIntervalRequired: "Review frequency must be at least 1 day",
+    checkIntervalTooLarge: "Check interval cannot be greater than total plan days",
     loginRequired: "Please log in first",
     taskIdMissing: "Task ID not received, cannot monitor generation progress",
     submitFailed: "Submission failed, please try again",
@@ -280,6 +287,8 @@ export const translations: Record<Locale, {
     fetchStageCheckFailed: "Failed to fetch stage check",
     stageCheckTitle: "Stage check",
     stageCheckLoading: "Generating self-check list…",
+    planAdjusting: "Adjusting plan…",
+    planAdjusted: "Plan adjusted, please continue learning",
     planAdjustmentFailed: "Plan adjustment failed, please update manually later",
     loadingDiagnosis: "Loading diagnosis…",
     diagnosisDetail: "Diagnosis details",
