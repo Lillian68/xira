@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.db import Base
@@ -8,6 +8,7 @@ from core.db import Base
 
 class StudyCheck(Base):
     __tablename__ = "study_check"
+    __table_args__ = (UniqueConstraint("plan_id", "day_number", name="uq_plan_day"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     plan_id: Mapped[int] = mapped_column(ForeignKey("study_plan.id"), nullable=False)

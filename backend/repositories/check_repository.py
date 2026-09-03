@@ -1,3 +1,5 @@
+from sqlalchemy.exc import IntegrityError
+
 from models.db.study_check import StudyCheck
 
 
@@ -13,10 +15,17 @@ class CheckRepository:
 
     def create(self, **kwargs) -> StudyCheck:
         check = StudyCheck(**kwargs)
-        self.db.add(check)
-        self.db.commit()
-        self.db.refresh(check)
-        return check
+        try:
+            self.db.add(check)
+            self.db.commit()
+            self.db.refresh(check)
+            return check
+        except IntegrityError:
+            self.db.rollback()
+            existing = self.get_by_plan_day(plan_id=kwargs.get("plan_id"), day_number=kwargs.get("day_number"))
+            if existing:
+                return existing
+            raise
 
     def save(self, check: StudyCheck) -> StudyCheck:
         self.db.add(check)

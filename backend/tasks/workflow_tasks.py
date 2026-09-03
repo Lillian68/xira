@@ -107,6 +107,11 @@ def task_spirit_dialogue(self, workflow_id: str) -> dict:
 @shared_task(bind=True, name="generate_exam")
 @db_task
 def task_generate_exam(self, db, plan_id: int, workflow_id: str, day_number: int) -> dict:
+    check_repo = CheckRepository(db)
+    existing = check_repo.get_by_plan_day(plan_id, day_number)
+    if existing:
+        return {"check": existing.to_dict()}
+
     workflow = current_app.extensions["workflow"]
     try:
         checklist = workflow.generate_exam(workflow_id)

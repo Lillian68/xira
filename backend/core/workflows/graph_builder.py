@@ -47,14 +47,19 @@ def build_graph(checkpointer):
     )
     builder.add_edge("generate_quiz", "evaluate_answers")
 
-    def after_evaluate(state: StudyState):
-        return "daily_checkin" if state.check.passed else "adjust_plan"
+    def after_evaluate(state):
+        if not state.check.passed:
+            return "adjust_plan"
+        if state.current_day - 1 >= state.total_days:
+            return "final_review"
+        return "daily_checkin"
 
     builder.add_conditional_edges(
         "evaluate_answers",
         after_evaluate,
         {
             "adjust_plan": "adjust_plan",
+            "final_review": "final_review",
             "daily_checkin": "daily_checkin",
         },
     )
