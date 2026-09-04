@@ -76,4 +76,4 @@ def test_submit_dispatches_evaluation(check_service, plan, check, mocker):
     task_evaluate_practice.delay.return_value.id = "task-2"
 
     assert check_service.submit(7, 9, {"assessment": "good"}) == {"task_id": "task-2", "check_id": 9}
-    task_evaluate_practice.delay.assert_called_once_with(check_id=9, assessment="good")
+    task_evaluate_practice.delay.assert_called_once_with(check_id=9, workflow_id="workflow-3", assessment="good")

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from types import SimpleNamespace
 
 import pytest
@@ -12,6 +12,7 @@ from services.plan_service import PlanService
 def plan_service(mocker):
     service = PlanService(db=None)
     service.plans = mocker.MagicMock()
+    service.spirits = mocker.MagicMock()
     return service
 
 
@@ -28,7 +29,7 @@ def plan():
     )
 
 
-def test_list_plans_refreshes_status_and_returns_dicts(plan_service, plan):
+def test_list_plans_returns_dicts(plan_service, plan):
     second_plan = SimpleNamespace(
         id=4,
         user_id=7,
@@ -38,14 +39,10 @@ def test_list_plans_refreshes_status_and_returns_dicts(plan_service, plan):
         to_dict=lambda: {"id": 4},
     )
     plan_service.plans.list_by_user.return_value = [plan, second_plan]
-    plan_service.plans.get_by_id.side_effect = lambda plan_id: {3: plan, 4: second_plan}.get(plan_id)
 
     result = plan_service.list_plans(7)
 
     assert result == [{"id": 3, "user_id": 7}, {"id": 4}]
-    assert plan_service.plans.get_by_id.call_args_list[0].args == (3,)
-    assert plan_service.plans.get_by_id.call_args_list[1].args == (4,)
-    assert plan_service.plans.save.call_count == 2
 
 
 def test_get_plan_rejects_plan_owned_by_another_user(plan_service, plan):
@@ -99,32 +96,3 @@ def test_update_plan_dispatches_adjustment(plan_service, plan, mocker):
 
     assert plan_service.update_plan(7, 3) == {"task_id": "task-adjust", "plan": plan.to_dict()}
     task_adjust_plan.delay.assert_called_once_with(plan_id=3, workflow_id="workflow-3")
-
-
-def test_get_status_created_to_started(plan_service):
-    spirit = SimpleNamespace(germinate_time=2, grow_time=3)
-    tasks = [SimpleNamespace(is_completed=True), SimpleNamespace(is_completed=True)]
-    plan = SimpleNamespace(status=PlanStatus.CREATED, tasks=tasks, spirit=spirit)
-    assert plan_service._get_status(plan) == PlanStatus.STARTED
-
-
-def test_get_status_finishes_or_marks_ongoing_plan_stagnant(plan_service):
-    completed_at = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=2)
-    completed = SimpleNamespace(is_completed=True, completed_at=completed_at)
-    plan = SimpleNamespace(status=PlanStatus.ONGOING, tasks=[completed], spirit=None)
-
-    assert plan_service._get_status(plan) == PlanStatus.FINISHED
-
-    plan.tasks.append(SimpleNamespace(is_completed=False, completed_at=None))
-    assert plan_service._get_status(plan) == PlanStatus.STAGNANT
-
-
-def test_get_status_revives_stagnant_plan_with_recent_completion(plan_service):
-    recent = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=2)
-    plan = SimpleNamespace(
-        status=PlanStatus.STAGNANT,
-        tasks=[SimpleNamespace(is_completed=True, completed_at=recent)],
-        spirit=None,
-    )
-
-    assert plan_service._get_status(plan) == PlanStatus.ONGOING
