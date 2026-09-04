@@ -14,7 +14,6 @@ from models.db.study_task import StudyTask
 from repositories.check_repository import CheckRepository
 from repositories.plan_repository import PlanRepository
 from repositories.result_repository import ResultRepository
-from repositories.spirit_repository import SpiritRepository
 from repositories.task_repository import TaskRepository
 
 
@@ -83,16 +82,6 @@ def task_generate_plan(self, db, plan_id: int, workflow_id: str, interview: dict
         for task in generated_plan.tasks
     ]
     task_repo.create_many(study_tasks)
-
-    plan_repo = PlanRepository(db)
-    spirit_repo = SpiritRepository(db)
-    plan = plan_repo.get_by_id(plan_id)
-    spirit = spirit_repo.get_random()
-    if spirit is None:
-        raise AppError("No spirit available for assignment")
-    plan.spirit = spirit
-    plan_repo.save(plan)
-
     return {"plan_id": plan_id}
 
 
@@ -151,6 +140,10 @@ def task_remedial_analysis(self, db, plan_id: int, workflow_id: str, actual_resu
         diagnosis_detail=remedial_analysis.diagnosis_detail,
         target_achieved=remedial_analysis.target_achieved,
     )
+    if remedial_analysis.target_achieved:
+        plan_repo = PlanRepository(db)
+        plan = plan_repo.get_by_id(plan_id)
+        plan.status = plan.get_status()
     return {"result": result.to_dict()}
 
 

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -43,10 +43,51 @@ class StudyPlan(Base):
             "start_date": self.start_date,
             "end_date": self.end_date,
             "check_interval": self.check_interval,
-            "status": self.status.value,
+            "status": self.get_status(),
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "spirit": self.spirit.to_dict() if self.spirit else None,
             "tasks": [p.to_dict() for p in sorted(self.tasks, key=lambda x: x.day_number)],
             "checks": [p.to_dict() for p in sorted(self.checks, key=lambda x: x.day_number)],
             "result": self.result.to_dict() if self.result else None,
         }
+
+    def get_status(self) -> PlanStatus:
+        if self.status == PlanStatus.FINISHED:
+            return self.status
+
+        completed_tasks = [task for task in self.tasks if task.is_completed]
+        completed_count = len(completed_tasks)
+        if self.status == PlanStatus.CREATED:
+            if self.spirit and completed_count >= self.spirit.germinate_time:
+                return PlanStatus.STARTED
+            return self.status
+
+        if self.status == PlanStatus.STARTED:
+            if self.spirit and completed_count >= self.spirit.grow_time:
+                return PlanStatus.ONGOING
+            return self.status
+
+        last_completed_at = None
+        if completed_tasks:
+            last_completed_at = max(completed_tasks, key=lambda t: t.completed_at).completed_at
+
+        now_utc = datetime.now(timezone.utc)
+        over_1day_no_new_completed = True
+        if last_completed_at:
+            last_aware = last_completed_at.replace(tzinfo=timezone.utc)
+            diff = now_utc - last_aware
+            if diff <= timedelta(days=1):
+                over_1day_no_new_completed = False
+
+        if self.status == PlanStatus.STAGNANT:
+            if not over_1day_no_new_completed:
+                return PlanStatus.ONGOING
+            return self.status
+
+        if self.status == PlanStatus.ONGOING:
+            if self.result and self.result.target_achieved:
+                return PlanStatus.FINISHED
+            if over_1day_no_new_completed:
+                return PlanStatus.STAGNANT
+
+        return self.status

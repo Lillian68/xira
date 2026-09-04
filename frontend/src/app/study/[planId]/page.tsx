@@ -816,6 +816,7 @@ function RemedialPanel({
   const [initialLoading, setInitialLoading] = useState(true);
   const [submitError, setSubmitError] = useState("");
   const [adjustError, setAdjustError] = useState("");
+  const { fetchPlan } = usePlanStore();
 
   const initRef = useRef(false);
   const submittingRef = useRef(false);
@@ -879,6 +880,8 @@ function RemedialPanel({
         } catch (adjustErr) {
           setAdjustError(adjustErr instanceof Error ? adjustErr.message : t.planAdjustmentFailed);
         }
+      } else {
+        await fetchPlan(planId);
       }
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : t.submitFailed);
