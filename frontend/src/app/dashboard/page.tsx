@@ -22,10 +22,38 @@ export default function DashboardPage() {
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
 
   const spiritPositions = useMemo(() => {
-    return plans.map(() => ({
-      leftPct: 20 + Math.random() * 60, // 20% ~ 80%
-      topPct: 20 + Math.random() * 60,  // 20% ~ 80%
-    }));
+    const count = plans.length;
+    if (count === 0) return [];
+
+    let cols = Math.ceil(Math.sqrt(count));
+    if (count <= cols) cols = count;
+
+    const rows = Math.ceil(count / cols);
+    const positions = [];
+    const leftMin = 20;
+    const leftMax = 80;
+    const topMin = 20;
+    const topMax = 80;
+    const colSpacing = (leftMax - leftMin) / (cols - 1 || 1);
+    const rowSpacing = (topMax - topMin) / (rows - 1 || 1);
+    const staggerOffset = colSpacing * 0.3;
+    const maxRandomOffsetX = colSpacing * 0.2;
+    const maxRandomOffsetY = rowSpacing * 0.2;
+
+    for (let i = 0; i < count; i++) {
+      const row = Math.floor(i / cols);
+      const col = i % cols;
+      const baseLeftPct = leftMin + col * colSpacing + (row % 2 === 0 ? 0 : staggerOffset);
+      const baseTopPct = topMin + row * rowSpacing;
+      const randomOffsetX = (Math.random() * 2 - 1) * maxRandomOffsetX;
+      const randomOffsetY = (Math.random() * 2 - 1) * maxRandomOffsetY;
+      let leftPct = baseLeftPct + randomOffsetX;
+      let topPct = baseTopPct + randomOffsetY;
+      leftPct = Math.min(Math.max(leftPct, leftMin), leftMax);
+      topPct = Math.min(Math.max(topPct, topMin), topMax);
+      positions.push({ leftPct, topPct });
+    }
+    return positions;
   }, [plans]);
 
   const handleSoilMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
