@@ -6,7 +6,7 @@
 
 **息壤，更懂你节奏的情感陪伴型自学引擎。**
 
-一个 AI 驱动、带有情感陪伴的个性化自学引擎：把模糊的学习愿望，培育成可执行、可反馈、会自我调整的成长路径。
+一个AI驱动、带有情感陪伴的个性化自学引擎：把模糊的学习愿望，培育成可执行、可反馈、会自我调整的成长路径。
 
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
